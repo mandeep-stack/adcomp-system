@@ -73,10 +73,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   /* ---------- VIDEO ---------- */
   .vsl-video { width: 100%; max-width: 900px; margin: 0 auto; padding: 0 0 8px; }
-  /* Frame matches the video's real shape (2940x1912), so there are no black bars */
-  .vsl-video .frame { position: relative; aspect-ratio: 2940 / 1912; background: transparent; }
-  .vsl-video iframe { border: none; position: absolute; top: 0; left: 0; height: 100%; width: 100%; }
-  @media (min-width: 901px) { .vsl-video .frame { border-radius: 12px; overflow: hidden; } }
+  /* The embed below brings its own 16:9 wrapper (inline style) */
+  @media (min-width: 901px) { .vsl-video > div { border-radius: 12px; overflow: hidden; } }
 
   /* ---------- QUIZ WRAPPER ---------- */
   .quiz-section { padding: 28px 16px 64px; }
@@ -268,14 +266,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- ============ VIDEO ============ -->
 <section class="vsl-video">
-  <div class="frame">
-    <iframe
-      loading="lazy" title="Gumlet video player"
-      src="https://play.gumlet.io/embed/6ab14d1e0dbee56acc33efbb?background=true&autoplay=false&loop=false&disable_player_controls=false"
-      referrerpolicy="origin"
-      allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen;clipboard-write;">
-    </iframe>
-  </div>
+<div style="position:relative;aspect-ratio:16/9;">
+      <iframe
+            loading="lazy" title="Gumlet video player"
+            src="https://play.gumlet.io/embed/6ab14d1e0dbee56acc33efbb?background=false&autoplay=false&loop=false&disable_player_controls=false"
+            style="border:none; position: absolute; top: 0; left: 0; height: 100%; width: 100%;"
+          referrerpolicy="origin"
+          allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen;clipboard-write;">
+          </iframe>
+    </div>
 </section>
 
 <!-- ============ CTA (reveals the quiz) ============ -->
