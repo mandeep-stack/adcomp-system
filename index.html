@@ -73,12 +73,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   /* ---------- VIDEO ---------- */
   .vsl-video { width: 100%; max-width: 900px; margin: 0 auto; padding: 0 0 8px; }
-  .vsl-video .frame { position: relative; aspect-ratio: 16/9; background: #000; }
+  /* Frame matches the video's real shape (2940x1912), so there are no black bars */
+  .vsl-video .frame { position: relative; aspect-ratio: 2940 / 1912; background: transparent; }
   .vsl-video iframe { border: none; position: absolute; top: 0; left: 0; height: 100%; width: 100%; }
   @media (min-width: 901px) { .vsl-video .frame { border-radius: 12px; overflow: hidden; } }
 
   /* ---------- QUIZ WRAPPER ---------- */
   .quiz-section { padding: 28px 16px 64px; }
+  /* Quiz stays hidden until the 5-second timer below reveals it */
+  .quiz-section.quiz-hidden { display: none; }
+  .quiz-section.quiz-fade { animation: quizIn 0.6s ease both; }
+  @keyframes quizIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 </style>
 
 <style>
@@ -256,7 +261,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </section>
 
 <!-- ============ QUIZ ============ -->
-<section class="quiz-section">
+<section class="quiz-section quiz-hidden" id="quiz-section">
+<noscript><style>.quiz-section.quiz-hidden{display:block!important}</style></noscript>
 <div id="acf-wrap">
   <div id="acf-bar"></div>
   <div id="acf-sending"><div class="acf-spin"></div><span>Saving your details…</span></div>
@@ -715,6 +721,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   window.addEventListener('resize', lockHeight);
   window.addEventListener('load', lockHeight);
 
+})();
+</script>
+
+<script>
+// Reveal the quiz 5 seconds after the page loads. Change QUIZ_DELAY_MS to adjust.
+(function(){
+  var QUIZ_DELAY_MS = 5000;
+  setTimeout(function(){
+    var s = document.getElementById('quiz-section');
+    if(!s) return;
+    s.classList.remove('quiz-hidden');
+    s.classList.add('quiz-fade');
+    // the quiz measures its height on load; re-measure now that it is visible
+    window.dispatchEvent(new Event('resize'));
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'quiz_revealed', variant: 'pages' });
+  }, QUIZ_DELAY_MS);
 })();
 </script>
 
