@@ -16,8 +16,53 @@
 <link rel="preconnect" href="https://play.gumlet.io">
 
 <!-- ============================================================
+     TRACKING: Meta Pixel PageView (hardcoded, loads before GTM) + server-side
+     PageView via the funnel-analyser worker (https://adcomp.xyz/capi/event).
+     Browser and server share one event ID so Meta deduplicates them.
+     The GTM base PageView tag is excluded on this hostname.
+     ============================================================ -->
+<script>
+(function () {
+  var eid = 'pv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+  window.__metaEventId = eid;
+
+  function cookie(n) {
+    var m = document.cookie.match('(?:^|; )' + n + '=([^;]*)');
+    return m ? decodeURIComponent(m[1]) : '';
+  }
+
+  // Make sure _fbp exists before the pixel loads, so the server event has it on first visit
+  if (!cookie('_fbp')) {
+    document.cookie = '_fbp=fb.1.' + Date.now() + '.' + Math.floor(Math.random() * 1e10) +
+      ';path=/;domain=.adcomp.xyz;max-age=7776000;SameSite=Lax';
+  }
+
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+
+  fbq('init', '797898887488783');
+  fbq('track', 'PageView', {}, { eventID: eid });
+
+  var fbc = cookie('_fbc');
+  var clid = new URLSearchParams(location.search).get('fbclid');
+  if (!fbc && clid) fbc = 'fb.1.' + Date.now() + '.' + clid;
+
+  // Server-side PageView -> funnel-analyser worker -> Meta Conversions API
+  fetch('https://adcomp.xyz/capi/event', {
+    method: 'POST',
+    keepalive: true,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ eventId: eid, url: location.href, fbp: cookie('_fbp'), fbc: fbc })
+  }).catch(function () {});
+})();
+</script>
+
+<!-- ============================================================
      TRACKING: Google Tag Manager (same container as the WordPress site).
-     The Meta Pixel / CAPI tags live inside GTM.
+     Meta PageView is hardcoded above; other Meta events still live in GTM.
      The form pushes "form_submission_vsl" to dataLayer.
      ============================================================ -->
 <script>window.dataLayer = window.dataLayer || [];</script>
